@@ -4,6 +4,13 @@ base_height = 4.8;
 
 // handle
 handle_height_max = 8;
+handle_width_max = 14.3;
+// handle width on long end
+handle_width_min_long = 6.35;
+// handle width on short end
+handle_width_min_short = 7.9;
+
+handle_length = base_dia;
 // tiny cylindrical base on which handle sits and swivels
 // (diameter is entirely below the handle, so it is irrelevant)
 handle_base = 1.6;
@@ -32,7 +39,25 @@ translate([case_wall_thickness + base_dia, case_wall_thickness + case_vertical_l
 	cube([case_wall_thickness, base_dia, handle_base + handle_height_max]);
 }
 
-// handle "grabber"
+// handle
 module handle(){
+	linear_extrude(height=handle_height_max) {
+		// long end
+		polygon([
+			[0,0],
+			[(handle_width_max - handle_width_min_long)/2, (handle_length - 25)],
+			[handle_width_max - (handle_width_max - handle_width_min_long)/2, (handle_length-25)],
+			[handle_width_max,0],
+		]);
 
+		// short end
+		polygon([
+			[0,0],
+			[(handle_width_max - handle_width_min_short)/2, -25],
+			[handle_width_max - (handle_width_max - handle_width_min_short)/2, -25],
+			[handle_width_max,0],
+		]);
+	}
 }
+
+!handle();
