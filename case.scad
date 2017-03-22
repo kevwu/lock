@@ -21,29 +21,29 @@ stepper_shaft_notch = 3;
 // length of notched part of shaft
 stepper_shaft_length = 6;
 
-case_wall_thickness = 10;
+base_wall_thickness = 10;
 // additional space above/below the deadbolt to allow for positioning
-case_vertical_leeway = 5;
+base_vertical_leeway = 5;
 
 module base() {
 	// enclose deadbolt base
 	difference() {
-		cube([base_dia + 2*case_wall_thickness, base_dia + 2*case_wall_thickness + case_vertical_leeway, base_height]);
+		cube([base_dia + 2*base_wall_thickness, base_dia + 2*base_wall_thickness + base_vertical_leeway, base_height]);
 
-		translate([case_wall_thickness, case_wall_thickness, 0]) {
-			cube([base_dia, base_dia + case_vertical_leeway, base_height]);
+		translate([base_wall_thickness, base_wall_thickness, 0]) {
+			cube([base_dia, base_dia + base_vertical_leeway, base_height]);
 		}
 	}
 
 	// motor mount
 
 	// supports over deadbolt handle
-	translate([0, case_wall_thickness + case_vertical_leeway/2, base_height]) {
-		cube([case_wall_thickness, base_dia, handle_base + handle_height_max]);
+	translate([0, base_wall_thickness + base_vertical_leeway/2, base_height]) {
+		cube([base_wall_thickness, base_dia, handle_base + handle_height_max]);
 	}
 
-	translate([case_wall_thickness + base_dia, case_wall_thickness + case_vertical_leeway/2, base_height]) {
-		cube([case_wall_thickness, base_dia, handle_base + handle_height_max]);
+	translate([base_wall_thickness + base_dia, base_wall_thickness + base_vertical_leeway/2, base_height]) {
+		cube([base_wall_thickness, base_dia, handle_base + handle_height_max]);
 	}
 }
 
@@ -93,7 +93,50 @@ module grabber() {
 	}
 }
 
-translate([-(handle_width_max)/2,0,0]) {
-	handle();
+stepper_motor_dia = 28.6;
+stepper_motor_height = 20;
+stepper_motor_flange_length = 8;
+stepper_motor_hole_dia = 3.17;
+stepper_wire_breakout = 19;
+
+// case for motor
+module motor_case() {
+	difference() {
+		case_thickness = 8;
+		// outer casing
+		union() {
+			cylinder(h=stepper_motor_height + case_thickness, d=stepper_motor_dia + case_thickness, $fn=300);
+
+			// side flanges
+			translate([stepper_motor_dia/2 + case_thickness, 0,0]) {
+				translate([-case_thickness/2, 0, (stepper_motor_height + case_thickness)/2]) {
+					cube([stepper_motor_flange_length, stepper_motor_flange_length, stepper_motor_height + case_thickness], center=true);
+				}
+				cylinder(h = stepper_motor_height + case_thickness, d = stepper_motor_flange_length, $fn = 100);
+			}
+
+			translate([-(stepper_motor_dia/2 + case_thickness), 0,0]) {
+				translate([case_thickness/2, 0, (stepper_motor_height + case_thickness)/2]) {
+					cube([stepper_motor_flange_length, stepper_motor_flange_length, stepper_motor_height + case_thickness], center=true);
+				}
+				cylinder(h = stepper_motor_height + case_thickness, d = stepper_motor_flange_length, $fn = 100);
+			}
+		}
+
+		union() {
+			// motor hole
+			cylinder(h=stepper_motor_height, d=stepper_motor_dia, $fn = 300);
+
+			// wire breakout hole
+			translate([0, stepper_motor_dia/2, stepper_motor_height/2]) {
+				cube([stepper_wire_breakout, 10, stepper_motor_height], center=true);
+			}
+		}
+	}
 }
-!grabber();
+
+// translate([-(handle_width_max)/2,0,0]) {
+// 	handle();
+// }
+// grabber();
+motor_case();
