@@ -107,19 +107,9 @@ module motor_case() {
 		union() {
 			cylinder(h=stepper_motor_height + case_thickness, d=stepper_motor_dia + case_thickness, $fn=300);
 
-			// side flanges
-			translate([stepper_motor_dia/2 + case_thickness, 0,0]) {
-				translate([-case_thickness/2, 0, (stepper_motor_height + case_thickness)/2]) {
-					cube([stepper_motor_flange_length, stepper_motor_flange_length, stepper_motor_height + case_thickness], center=true);
-				}
-				cylinder(h = stepper_motor_height + case_thickness, d = stepper_motor_flange_length, $fn = 100);
-			}
-
-			translate([-(stepper_motor_dia/2 + case_thickness), 0,0]) {
-				translate([case_thickness/2, 0, (stepper_motor_height + case_thickness)/2]) {
-					cube([stepper_motor_flange_length, stepper_motor_flange_length, stepper_motor_height + case_thickness], center=true);
-				}
-				cylinder(h = stepper_motor_height + case_thickness, d = stepper_motor_flange_length, $fn = 100);
+			// cross-beam (for mounting and flanges)
+			translate([0,0,5]) {
+				cube([base_dia + 10, stepper_motor_flange_length, 10], center=true);
 			}
 		}
 
@@ -135,8 +125,16 @@ module motor_case() {
 	}
 }
 
-// translate([-(handle_width_max)/2,0,0]) {
-// 	handle();
-// }
-// grabber();
-motor_case();
+translate([-(handle_width_max)/2,0,0]) {
+	%handle();
+}
+
+// handle's axis of rotation is not centered on base. 5mm here is eyeballed
+translate([0, 5, -base_height]) {
+	%cylinder(h=base_height, d=base_dia, $fn = 100);
+}
+
+grabber();
+translate([0,0,handle_base + handle_height_max + stepper_shaft_length + 5]) {
+	motor_case();
+}
