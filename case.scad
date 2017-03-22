@@ -109,7 +109,32 @@ module motor_case() {
 
 			// cross-beam (for mounting and flanges)
 			translate([0,0,5]) {
-				cube([base_dia + 10, stepper_motor_flange_length, 10], center=true);
+				cube([base_dia + 3*case_thickness, stepper_motor_flange_length, 10], center=true);
+			}
+
+			column_height = base_height + handle_base + handle_height_max + stepper_shaft_length;
+
+			// base (for mounting onto door)
+			translate([base_dia/2 + case_thickness, 0, 0]) {
+				// column
+				translate([0,0,-10]) {
+					cube([case_thickness, stepper_motor_flange_length, column_height], center=true);
+				}
+				// skid
+				translate([0,0,-column_height]) {
+					cube([1.5*case_thickness, base_dia + 2*case_thickness, case_thickness/2], center=true);
+				}
+			}
+
+			translate([-(base_dia/2 + case_thickness),0,0]) {
+				// column
+				translate([0,0,-10]) {
+					cube([case_thickness, stepper_motor_flange_length, column_height], center=true);
+				}
+				// skid
+				translate([0,0,-column_height]) {
+					cube([1.5*case_thickness, base_dia + 2*case_thickness, case_thickness/2], center=true);
+				}
 			}
 		}
 
@@ -136,5 +161,5 @@ translate([0, 5, -base_height]) {
 
 grabber();
 translate([0,0,handle_base + handle_height_max + stepper_shaft_length + 5]) {
-	motor_case();
+	!motor_case();
 }
