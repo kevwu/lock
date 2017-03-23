@@ -37,7 +37,6 @@ class Stepper {
 		let p = 0;
 		// usual stepper motor business
 		this.runTimeout = setInterval(() => {
-			console.log("Stepping " + p +"," +  wrapIndex(p+1, 4))
 			rpio.write(this.pins[wrapIndex(p-1, 4)], rpio.LOW)
 			rpio.write(this.pins[p], rpio.HIGH)
 			rpio.write(this.pins[wrapIndex(p+1, 4)], rpio.HIGH)
@@ -47,7 +46,7 @@ class Stepper {
 			} else {
 				p = wrapIndex(p - 1, 4)
 			}
-		}, 100)
+		}, 10) 
 	}
 
 	// stops motor and removes resistance (so it can be turned by hand)
