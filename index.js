@@ -11,8 +11,8 @@ const UNLOCKED_SWITCH = 18
 // physical button for manually opening/closing
 const BUTTON = 15
 
-rpio.open(LOCKED_SWITCH, rpio.INPUT)
-rpio.open(UNLOCKED_SWITCH, rpio.INPUT)
+rpio.open(LOCKED_SWITCH, rpio.INPUT, rpio.PULL_UP)
+rpio.open(UNLOCKED_SWITCH, rpio.INPUT, rpio.PULL_UP)
 
 // represents four-pin stepper motor
 class Stepper {
@@ -51,7 +51,6 @@ class Stepper {
 
 	// stops motor and removes resistance (so it can be turned by hand)
 	halt() {
-		console.log("Halting")
 		clearInterval(this.runTimeout)
 
 		for(let i = 0; i < 4; i += 1) {
@@ -96,15 +95,20 @@ app.get("/halt", (req, res) => {
 })
 
 // watch for switches
-rpio.poll(LOCKED_SWITCH, () => {
-	motor.halt()
-	console.log("Locked.")
-})
+rpio.poll(LOCKED_SWITCH, (pin) => {
+	// only run if it was a release event (1)
+	if(rpio.read(pin) === 1) {
+		console.log("Locked: " + rpio.read(pin))
+		motor.halt()
+	}
+}, rpio.POLL_HIGH)
 
-rpio.poll(UNLOCKED_SWITCH, () => {
-	motor.halt()
-	console.log("Unlocked.")
-})
+rpio.poll(UNLOCKED_SWITCH, (pin) => {
+	if(rpio.read(pin) === 1) {
+		console.log("Unlocked: " + rpio.read(pin))
+		motor.halt()
+	}
+}, rpio.POLL_HIGH)
 
 // manual button
 rpio.poll(BUTTON, () => {
@@ -118,7 +122,8 @@ rpio.poll(BUTTON, () => {
 })
 
 function open() {
-	if(!rpio.read(UNLOCKED_SWITCH)) {
+	// switch states are reversed - 0 is depressed, 1 is released
+	if(rpio.read(UNLOCKED_SWITCH)) {
 		console.log("Unlocking...")
 		motor.run()
 	} else {
@@ -127,7 +132,7 @@ function open() {
 }
 
 function close() {
-	if(!rpio.read(LOCKED_SWITCH)) {
+	if(rpio.read(LOCKED_SWITCH)) {
 		console.log("Locking...")
 		motor.run(reverse=true)
 	} else {
