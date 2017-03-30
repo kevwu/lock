@@ -108,11 +108,18 @@ app.get("/halt", (req, res) => {
 
 // watch for switches
 rpio.poll(LOCKED_SWITCH, (pin) => {
-	console.log("locked switch")
+	// if door is currently unlocked, pressing the locked trigger manually locks the door
+	if(!rpio.read(UNLOCKED_SWITCH)) {
+		console.log("Manually locking.")
+		close()
+	}
 })
 
 rpio.poll(UNLOCKED_SWITCH, (pin) => {
-	console.log("unlocked switch")
+	if(!rpio.read(LOCKED_SWITCH)) {
+		console.log("Manual unlocking.")
+		open()
+	}
 })
 
 // manual button
