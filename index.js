@@ -46,11 +46,23 @@ class Stepper {
 			} else {
 				p = wrapIndex(p - 1, 4)
 			}
-		}, 10) 
+
+			// Switches are backwards - 1 is open, 0 is pressed
+
+			if(!rpio.read(LOCKED_SWITCH) && !reverse) {
+				this.halt()
+			}
+
+			if(!rpio.read(UNLOCKED_SWITCH) && reverse) {
+				this.halt()
+			}
+
+		}, 5) 
 	}
 
 	// stops motor and removes resistance (so it can be turned by hand)
 	halt() {
+		console.log("Stopping.")
 		clearInterval(this.runTimeout)
 
 		for(let i = 0; i < 4; i += 1) {
@@ -96,36 +108,23 @@ app.get("/halt", (req, res) => {
 
 // watch for switches
 rpio.poll(LOCKED_SWITCH, (pin) => {
-	// only run if it was a release event (1)
-	if(rpio.read(pin) === 1) {
-		console.log("Locked: " + rpio.read(pin))
-		motor.halt()
-	}
-}, rpio.POLL_HIGH)
+	console.log("locked switch")
+})
 
 rpio.poll(UNLOCKED_SWITCH, (pin) => {
-	if(rpio.read(pin) === 1) {
-		console.log("Unlocked: " + rpio.read(pin))
-		motor.halt()
-	}
-}, rpio.POLL_HIGH)
+	console.log("unlocked switch")
+})
 
 // manual button
 rpio.poll(BUTTON, () => {
-	if(rpio.read(LOCKED_SWITCH) && !rpio.read(UNLOCKED_SWITCH)) {
-		open()
-	} else if(rpio.read(UNLOCKED_SWITCH) && !rpio.read(LOCKED_SWITCH)) {
-		close()
-	} else {
-		console.log("Lock state is already moving or invalid.")
-	}
+
 })
 
 function open() {
 	// switch states are reversed - 0 is depressed, 1 is released
 	if(rpio.read(UNLOCKED_SWITCH)) {
 		console.log("Unlocking...")
-		motor.run()
+		motor.run(reverse=true)
 	} else {
 		console.log("Already unlocked.")
 	}
@@ -134,7 +133,7 @@ function open() {
 function close() {
 	if(rpio.read(LOCKED_SWITCH)) {
 		console.log("Locking...")
-		motor.run(reverse=true)
+		motor.run()
 	} else {
 		console.log("Already locked.")
 	}
