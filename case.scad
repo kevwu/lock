@@ -93,6 +93,27 @@ module grabber() {
 	}
 }
 
+// longer version of grabber (for longer lever arm)
+module grabber_long() {
+	cyl_dia = 8;
+	cyl_height = handle_height_max + stepper_shaft_length + 2;
+	difference() {
+		union() {
+			translate([10, 26, 0])
+				cylinder(h=cyl_height, d=cyl_dia, $fn = 100);
+			translate([-10,26,0])
+				cylinder(h=cyl_height, d=cyl_dia, $fn = 100);
+			translate([0, 10 ,cyl_height - stepper_shaft_length/2])
+				cube([20 + cyl_dia, 24 + cyl_dia ,stepper_shaft_length], center=true);
+		}
+
+		intersection() {
+			cylinder(h=50, d=stepper_shaft_dia, $fn = 50);
+			cube([stepper_shaft_dia, stepper_shaft_notch, 50], center=true);
+		}
+	}
+}
+
 stepper_motor_dia = 28.6;
 stepper_motor_height = 20;
 stepper_motor_flange_length = 8;
@@ -159,7 +180,7 @@ translate([0, 5, -base_height]) {
 	%cylinder(h=base_height, d=base_dia, $fn = 100);
 }
 
-grabber();
+!grabber_long();
 translate([0,0,handle_base + handle_height_max + stepper_shaft_length + 5]) {
-	!motor_case();
+	motor_case();
 }
